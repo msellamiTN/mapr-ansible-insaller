@@ -1,0 +1,10 @@
+---
+- name: Replace prereq_check_ram.py
+  copy:
+    src: prereq_check_ram.py
+    dest: /opt/mapr/installer/mapr_ansible/playbooks/library/prereq/prereq_check_ram.py
+    mode: '0755'  # Set the appropriate permissions
+
+- name: Replace configure_master.yml with configure_security_controller.yml
+  command: "sed -i 's/configure_master.yml/configure_security_controller.yml/g' /opt/mapr/installer/mapr_ansible/playbooks/update_services.yml"
+

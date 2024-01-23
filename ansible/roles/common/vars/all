@@ -1,0 +1,8 @@
+# mapr_subnets is optional, if required just remove #
+#mapr_subnets: 10.0.0.0/24
+mapr_create_user: True
+mapr_user: mapr
+mapr_group: mapr
+# UID only for creation required.
+mapr_group_gid: 5000
+mapr_user_uid: 5000

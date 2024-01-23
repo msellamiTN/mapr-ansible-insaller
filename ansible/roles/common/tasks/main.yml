@@ -1,0 +1,130 @@
+# common/tasks/main.yml
+
+- name: Install OpenJDK 11
+  become: yes  # This will elevate the privilege to root for the task
+  vars:
+    packages_Debian: ['openjdk-11-jdk'] # OpenJDK 11 for Debian/Ubuntu
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ vars['packages_' + ansible_os_family] }}"
+- name: Set JAVA_HOME environment variable
+  become: yes
+  lineinfile:
+    path: /etc/environment
+    line: 'JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"'
+    state: present
+
+- name: Get JAVA_HOME from /etc/environment
+  command: grep JAVA_HOME /etc/environment
+  register: java_home
+  changed_when: false
+  check_mode: false
+
+- name: Print JAVA_HOME
+  debug:
+    var: java_home.stdout
+
+# It's done by Vagrant
+#- name: Add hosts to /etc/hosts
+#  lineinfile:
+#    path: /etc/hosts
+#    line: "{{ hostvars[item].ansible_host }} {{ item }}"
+#  loop: "{{ ansible_play_batch }}"
+
+#- name: Copy SSH keys
+#  authorized_key:
+#    user: "{{ ansible_user }}"
+#    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+#  loop: "{{ ansible_play_batch }}"
+
+
+#- name: Create MapR Group
+#  become: true 
+#  group:
+#   name: "{{ mapr_group }}"
+#    gid: "{{ mapr_group_gid }}"
+#    state: present
+#- name: Create MapR User
+#  become: true 
+#  user:
+#    name: "{{ mapr_user }}"
+#    comment: "MapR default user"
+#    uid: "{{ mapr_user_uid }}"
+#    group: "{{mapr_group}}"
+#    groups: "{{ mapr_group }}"
+#    password: "{{ mapr_passwd }}"
+#    createhome: true
+#    update_password: on_create
+#    state: present
+#    append: true
+#   groups={{ mapr_group }},root,wheel
+
+- name: Update package cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600 # 1 hour
+  when: ansible_os_family == 'Debian'
+
+
+- name: Install NTP
+  package: name=ntp state=present
+
+# ntp can't start in a container, hence no molecule tests
+- name: Start the ntp service
+  vars:
+    service_Debian: ntp
+  service:
+    name: "{{ vars['service_' + ansible_os_family] }}"
+    state: started
+    enabled: true
+  tags:
+    - skip-docker
+    
+- name: Install RPC bind
+  package: name=rpcbind state=present
+
+# Other actions
+- name: Start the RPC bind service
+  service: name=rpcbind state=started enabled=yes
+  
+- name: Install required Ansible package to handle SELinux
+  package:
+    name: python3-selinux
+    state: present
+  when: ansible_os_family != 'Suse'
+
+- name: Install miscellaneous packages - Midnight commander, wget, Python MySQL, openssl
+  become: true 
+  vars:
+    packages_Debian: ['mc', 'wget', 'python3-mysqldb', 'openssl', 'syslinux-utils', 'libpython3.8'] # Update libpython for the correct Python 3 version
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ vars['packages_' + ansible_os_family] }}"
+
+- name: Set vm.swappiness in /etc/sysctl.conf
+  become: true  
+  lineinfile:
+    dest: /etc/sysctl.conf
+    regexp: "{{item.regex}}"
+    line: "{{item.line}}"
+    create: true
+  with_items:
+    - regex: ^vm\.swappiness
+      line: vm.swappiness = 1
+    - regex: ^net\.ipv4\.tcp_retries2
+      line: net.ipv4.tcp_retries2 = 5
+    - regex: ^vm\.overcommit_memory
+      line: vm.overcommit_memory = 0
+    - regex: ^net\.ipv4\.tcp_fin_timeout
+      line: net.ipv4.tcp_fin_timeout = 30
+  register: sysctl_update
+  notify: "Reload Sysctl"
+
+- name: Set suid bit on unix_chkpwd
+  ansible.builtin.file:
+    path: /usr/sbin/unix_chkpwd
+    mode: '4755'
+

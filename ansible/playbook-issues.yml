@@ -1,0 +1,7 @@
+---
+- name: Configure MapR Edge Node
+  hosts: mapr-edge
+  become: yes
+
+  roles:
+   - customize-mapr-installer
