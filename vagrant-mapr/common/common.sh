@@ -51,4 +51,4 @@ sysctl -p
 # Print JAVA_HOME
 java_home=$(grep JAVA_HOME /etc/environment)
 echo "JAVA_HOME: $java_home"
-HPE_PASSPORT_TOKEN="mEkRZt6iQ20DXpB0Rkta9ZxNO_SKDMUBNk5I1BZnEUYzIKBkRBblulDSu94hBAiA996vy23UocIeIVsY0V1eGg"
+HPE_PASSPORT_TOKEN=""
