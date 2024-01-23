@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Replace with your HPE Passport email and token
-HPE_PASSPORT_EMAIL="mokhtar.sellami@data2-ai.com"
-HPE_PASSPORT_TOKEN="mEkRZt6iQ20DXpB0Rkta9ZxNO_SKDMUBNk5I1BZnEUYzIKBkRBblulDSu94hBAiA996vy23UocIeIVsY0V1eGg"
+HPE_PASSPORT_EMAIL=""
+HPE_PASSPORT_TOKEN=""
 
 # Define the necessary environment variables
 export DATA_FABRIC_VERSION="7.5.0"
