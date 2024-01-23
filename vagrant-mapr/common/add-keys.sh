@@ -3,8 +3,8 @@
 # Install the Data Fabric package key
  
 # Specify your HPE Passport account email and token
-EMAIL="mokhtar.sellami@data2-ai.com"
-TOKEN="mEkRZt6iQ20DXpB0Rkta9ZxNO_SKDMUBNk5I1BZnEUYzIKBkRBblulDSu94hBAiA996vy23UocIeIVsY0V1eGg"
+EMAIL=""
+TOKEN=""
 
 
 # Check the Linux distribution
